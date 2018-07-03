@@ -5,11 +5,11 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-public class Sender {
-
-    private final static String QUEUE_NAME="hello1";
+public class Sender extends MQDao{
 
     /**
      *    producer(生产者)端步骤：
@@ -28,12 +28,20 @@ public class Sender {
 
         try {
             factory=new ConnectionFactory();
-            factory.setHost("localhost");
+            factory.setUsername(USERNAME);
+            factory.setPassword(PASSWORD);
+            factory.setHost(HOST);
+            factory.setPort(PORT);
+            factory.setVirtualHost(VHOST);
             connection=factory.newConnection();
             channel=connection.createChannel();
-            channel.queueDeclare(QUEUE_NAME,false,false,false,null);
-            String message="Hello MQ4";
-            channel.basicPublish("",QUEUE_NAME,null,message.getBytes("UTF-8"));
+//            Map map=new HashMap();
+//            map.put("x-max-length-bytes",1048576l);
+//            map.put("x-overflow","reject-publish");
+//            channel.queueDeclare(QUEUE_NAME,true,false,false,map);
+            String message="Hello MQ411";
+            //topic模式，如果不加ROUTINGKEY，topic模式广播
+            channel.basicPublish(EXCHANGE,ROUTINGKEY,null,message.getBytes("UTF-8"));
             System.out.println("消息已发送成功"+message);
         } catch (IOException e) {
             e.printStackTrace();

@@ -3,11 +3,11 @@ package com.smart;
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-public class Receiver {
-
-    private final static String QUEUE_NAME="hello1";
+public class Receiver extends MQDao{
 
     /**
      *  consumer(消费者)端步骤：
@@ -24,10 +24,17 @@ public class Receiver {
 
         try {
             factory=new ConnectionFactory();
-            factory.setHost("localhost");
+            factory.setUsername(USERNAME);
+            factory.setPassword(PASSWORD);
+            factory.setHost(HOST);
+            factory.setPort(PORT);
+            factory.setVirtualHost(VHOST);
             connection=factory.newConnection();
             channel=connection.createChannel();
-            channel.queueDeclare(QUEUE_NAME,false,false,false,null);
+//            Map map=new HashMap();
+//            map.put("x-max-length-bytes",1048576l);
+//            map.put("x-overflow","reject-publish");
+//            channel.queueDeclare(QUEUE_NAME,true,false,false,null);
 //            Consumer consumer=new DefaultConsumer(channel){
 //                @Override
 //                public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
@@ -38,11 +45,12 @@ public class Receiver {
 //            };
             QueueingConsumer consumer = new QueueingConsumer(channel);
             channel.basicConsume(QUEUE_NAME,true,consumer);
-        while (true){
-            QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-            String message = new String(delivery.getBody());
-            System.out.println("[" + message + "]");
-        }
+            System.out.println("连接成功！");
+            while (true){
+                QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+                String message = new String(delivery.getBody());
+                System.out.println("[" + message + "]");
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
